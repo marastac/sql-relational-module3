@@ -1,23 +1,33 @@
+"""
+Student Management System with SQLite
+CSE 310 – Module 3
+Author: Mario Alberto Astonitas Acuña
+
+This small program uses Python and SQLite to store and manage
+basic student information in a relational database.
+"""
+
 import sqlite3
 
-# -------------------------------------------------------
-# Configuration
-# -------------------------------------------------------
-
+# Name of the SQLite database file
 DB_NAME = "students.db"
 
 
+# --------------------------------------------------
+# Database helpers
+# --------------------------------------------------
+
 def create_connection():
     """
-    Create and return a connection to the SQLite database.
+    Open a connection to the SQLite database and return it.
     """
     return sqlite3.connect(DB_NAME)
 
 
 def initialize_database():
     """
-    Create the students table if it does not already exist.
-    This function is called once at the beginning of the program.
+    Create the students table if it does not exist yet.
+    This is called once at the beginning of the program.
     """
     with create_connection() as conn:
         cur = conn.cursor()
@@ -35,14 +45,13 @@ def initialize_database():
         conn.commit()
 
 
-# -------------------------------------------------------
+# --------------------------------------------------
 # CRUD operations (Create, Read, Update, Delete)
-# -------------------------------------------------------
+# --------------------------------------------------
 
 def add_student(name: str, age: int, email: str, grade: float) -> None:
     """
-    Insert a new student record into the database.
-    This demonstrates an INSERT statement.
+    Add a new student to the database (INSERT).
     """
     with create_connection() as conn:
         cur = conn.cursor()
@@ -55,8 +64,7 @@ def add_student(name: str, age: int, email: str, grade: float) -> None:
 
 def update_student_grade(student_id: int, new_grade: float) -> None:
     """
-    Update the grade of an existing student.
-    This demonstrates an UPDATE statement.
+    Update the grade of an existing student (UPDATE).
     """
     with create_connection() as conn:
         cur = conn.cursor()
@@ -69,8 +77,7 @@ def update_student_grade(student_id: int, new_grade: float) -> None:
 
 def delete_student(student_id: int) -> None:
     """
-    Delete a student record from the database.
-    This demonstrates a DELETE statement.
+    Remove a student from the database (DELETE).
     """
     with create_connection() as conn:
         cur = conn.cursor()
@@ -80,8 +87,7 @@ def delete_student(student_id: int) -> None:
 
 def fetch_all_students():
     """
-    Retrieve all student records from the database.
-    This demonstrates a SELECT statement.
+    Return a list with all students (SELECT * FROM).
     """
     with create_connection() as conn:
         cur = conn.cursor()
@@ -91,7 +97,7 @@ def fetch_all_students():
 
 def fetch_student_by_id(student_id: int):
     """
-    Retrieve a single student by id, or None if it does not exist.
+    Return one student by id, or None if it does not exist.
     """
     with create_connection() as conn:
         cur = conn.cursor()
@@ -102,14 +108,13 @@ def fetch_student_by_id(student_id: int):
         return cur.fetchone()
 
 
-# -------------------------------------------------------
+# --------------------------------------------------
 # Aggregate functions (COUNT and AVG)
-# -------------------------------------------------------
+# --------------------------------------------------
 
 def get_student_count() -> int:
     """
-    Return the total number of students.
-    Uses the COUNT aggregate function.
+    Return how many students are stored in the table.
     """
     with create_connection() as conn:
         cur = conn.cursor()
@@ -121,7 +126,7 @@ def get_student_count() -> int:
 def get_average_grade() -> float:
     """
     Return the average grade of all students.
-    Uses the AVG aggregate function.
+    If there are no records, return 0.0.
     """
     with create_connection() as conn:
         cur = conn.cursor()
@@ -130,13 +135,13 @@ def get_average_grade() -> float:
         return avg if avg is not None else 0.0
 
 
-# -------------------------------------------------------
-# Helper to print results
-# -------------------------------------------------------
+# --------------------------------------------------
+# Helper to print results in a simple table
+# --------------------------------------------------
 
 def print_students_table(rows) -> None:
     """
-    Pretty-print a list of student records to the console.
+    Print a list of students in a readable table format.
     """
     if not rows:
         print("\nNo students found.\n")
@@ -149,13 +154,13 @@ def print_students_table(rows) -> None:
     print()
 
 
-# -------------------------------------------------------
+# --------------------------------------------------
 # Text menu (user interface)
-# -------------------------------------------------------
+# --------------------------------------------------
 
 def menu() -> None:
     """
-    Display a simple text menu and handle user choices.
+    Show the menu and handle the user choices in a loop.
     """
     while True:
         print("\n=== Student Database Menu ===")
@@ -174,17 +179,17 @@ def menu() -> None:
             name = input("Name: ").strip()
             age = int(input("Age: ").strip())
             email = input("Email: ").strip()
-            grade = float(input("Grade (0-20 or 0-100, you decide): ").strip())
+            grade = float(input("Grade (0–20 or 0–100): ").strip())
             add_student(name, age, email, grade)
             print("Student added successfully.")
 
         elif choice == "2":
-            # Read (SELECT all)
+            # Read all students
             rows = fetch_all_students()
             print_students_table(rows)
 
         elif choice == "3":
-            # Update (UPDATE)
+            # Update grade
             student_id = int(input("Enter the student ID to update: ").strip())
             new_grade = float(input("New grade: ").strip())
             if fetch_student_by_id(student_id) is None:
@@ -194,7 +199,7 @@ def menu() -> None:
                 print("Grade updated successfully.")
 
         elif choice == "4":
-            # Delete (DELETE)
+            # Delete student
             student_id = int(input("Enter the student ID to delete: ").strip())
             if fetch_student_by_id(student_id) is None:
                 print("No student found with that ID.")
@@ -203,7 +208,7 @@ def menu() -> None:
                 print("Student deleted successfully.")
 
         elif choice == "5":
-            # Aggregate functions (COUNT and AVG)
+            # Aggregate functions
             count = get_student_count()
             avg = get_average_grade()
             print(f"\nTotal number of students: {count}")
@@ -226,14 +231,13 @@ def menu() -> None:
             print("Invalid option. Please choose a number from 1 to 7.")
 
 
-# -------------------------------------------------------
+# --------------------------------------------------
 # Main entry point
-# -------------------------------------------------------
+# --------------------------------------------------
 
 def main() -> None:
     """
-    Entry point of the program.
-    Initializes the database and starts the menu.
+    Initialize the database and start the menu.
     """
     print("Initializing database...")
     initialize_database()
